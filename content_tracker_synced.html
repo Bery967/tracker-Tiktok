@@ -69,6 +69,21 @@
   body.role-editor #reset-all-btn,
   body.role-editor #import-backup-btn { display:none !important; }
 
+  /* EDITOR: nessuna aggiunta, nessuna eliminazione/duplicazione/modifica,
+     unico passaggio consentito: girato -> editato */
+  body.role-editor .add-form:not(.filter-bar),
+  body.role-editor .agenda-actions [data-act="dup"],
+  body.role-editor .agenda-actions [data-act="del"],
+  body.role-editor .agenda-actions [data-act="edit"],
+  body.role-editor .agenda-actions [data-act="prev"] { display:none !important; }
+  body.role-editor .agenda-actions [data-act="next"]:not([data-next-status="editato"]) { display:none !important; }
+  /* Calendario in sola lettura per l'editor (visualizzazione soltanto) */
+  body.role-editor .target-settings button,
+  body.role-editor #dup-day-btn,
+  body.role-editor [data-publish] { display:none !important; }
+  body.role-editor .target-settings input,
+  body.role-editor .slot select { pointer-events:none; opacity:0.7; }
+
   .ret-card{background:var(--ink-2);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-bottom:12px;border-left:4px solid var(--muted);}
   .ret-card.ok{border-left-color:var(--teal);}
   .ret-card.warn{border-left-color:var(--amber);}
@@ -496,7 +511,7 @@
       <div id="bulk-preview" style="font-size:11px;color:var(--muted);margin-top:4px;"></div>
     </div>
 
-    <div class="add-form" style="display:flex;gap:10px;align-items:center;padding:14px 18px;">
+    <div class="add-form filter-bar" style="display:flex;gap:10px;align-items:center;padding:14px 18px;">
       <input type="text" id="backlog-search" data-i18n-placeholder="search_placeholder" placeholder="Cerca marca, tipologia, nome video..." style="flex:1;">
       <select id="backlog-status-filter">
         <option value="all" data-i18n="filter_active">Attivi (esclude pubblicati)</option>
@@ -1948,8 +1963,8 @@ function renderPipeline(){
         <span class="tag ${tagClass}">${escapeHtml(tagLabel)}</span>
         <span class="agenda-title">${it.hook ? escapeHtml(it.hook) : '<span style="color:var(--muted);font-style:italic;">(senza nome)</span>'}</span>
         <div class="agenda-actions">
-          ${prev ? `<button data-act="prev" data-id="${it.id}">← ${prev}</button>` : ''}
-          ${next ? `<button data-act="next" data-id="${it.id}">${next} →</button>` : ''}
+          ${prev ? `<button data-act="prev" data-id="${it.id}" data-prev-status="${prev}">← ${prev}</button>` : ''}
+          ${next ? `<button data-act="next" data-id="${it.id}" data-next-status="${next}">${next} →</button>` : ''}
           <button data-act="edit" data-id="${it.id}">${t('btn_edit')}</button>
           <button data-act="dup" data-id="${it.id}">${t('btn_dup')}</button>
           <button class="del" data-act="del" data-id="${it.id}">${t('btn_del')}</button>
