@@ -1,1 +1,748 @@
-RESTORE_PENDING
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAADSklEQVR4nO2WTUhUURSAv3E0KzQssSDIrOyH/qCoUMqCaFOUVkQU6U4qK/qB0YJKSEtoE7RqEbgQCqpFIUrbVhkSRAspox+JkFqE/WBmkzMtznm8O863M+rW88HjvXvOuefec+695z4wDMMwDMMwDMMwDMMwDMMwDMMwpgaRDLqTwDLgj7Z/AwNAD/AaSKg8B7gOTHNsAeJAHtAGDDnyIuAKMAYMA81AMmT8lUAtUAH8BZ4C94BXOuZVYAZwX+fkkg9cU32TjjNhXujEwp6XwFy1y8tgl0SS6HI8oF8Y0OcAtzL4u6l21dqOa8Aul1TXMdGgXTqBUeAYsAbYCMRUlkRWNVcnPKTy/cBSJOhy/c51fEaQ5I0CH/UdC4zbov5/AgeAYqCE1MTVqu0TZCedd/rPVtl3ZAdMmi4drDQgX6DOk8AeDWpY27Oy+CxRu15gi36/R5LoTd5b1dUh/Q/r2F913HmOfZHadKisLmuEWfASsCJEdwrJ8m0gip+QTUABUKjv6YF+ddovpgEMar9Fqt+r+u4M84qQWrta1UcLUKbfb/GTOmm8BATPMMAq1XUjxc9LQPC5G+j3LOCzGQm4UduNqr8Q6FetuhhwFjiHf+7zkeMSR45iEtgwgTjTkikB61XXRWoCBpHs9yNbu83pU4y/5aMqK1PZgLYb8FfTpZ//k1vo6Hc58kfjDzG1QKUjGiI7iFxNb/TtUQV8cNru9bYT/+rsQLbxTOAXchPMQW6eBFJbmp2+NcgZnw/c0T4jjv4x8A45Sk3jiGlcpCuCFfg3wTpSi2BRBn+9pL/axoB6ZDt7st0hPrYjW/1BQB4BnqeZb/CKHDedSJYbkYpdA7Q7E/QKVRSpyiPIFq4CtgGbga3If0IB/hldi6z4YuQIHEES0K/+jjpjxJBVXQKcceTLA3ONIPVlRH16NCCLVT+ZBPSRfsXa8I9Gth+hUmCffreHjJPj2JarrJX0/sKutwjwhdSaFUEWxrsVQslUAy4id35c28PqqA/44diNASfU11/8c5/Q4L4hK38aeBgyTgLYgfz6etv1MpKsQ0Cl2vQg5/9TiI8kskNKgM+OrBL5pb+RIU7DMAzDMAzDMAzDMAzDMAzDMAxjSvAPaU8M/0fJ0UAAAAAASUVORK5CYII=">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Content Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#F9F9F7;
+    --ink-2:#FFFFFF;
+    --paper:#0B0B0B;
+    --paper-dim:#ECECE9;
+    --red:#D03B3B;
+    --teal:#2A78D6;
+    --green-editato:#0A850A;
+    --amber:#FAB219;
+    --amber-strong:#966703;
+    --muted:#898781;
+    --line: rgba(11,11,11,0.08);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--ink);
+    color:var(--paper);
+    font-family:'Space Grotesk',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1150px;margin:0 auto;padding:28px 20px 60px;}
+
+  header{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:16px;
+    padding-bottom:18px;
+    border-bottom:3px solid var(--paper);
+    margin-bottom:22px;
+    flex-wrap:wrap;
+  }
+  .slate{display:flex;align-items:center;gap:14px;}
+  .slate-badge{
+    background:var(--red);
+    color:var(--ink-2);
+    font-family:'Fraunces',serif;
+    font-weight:700;
+    font-style:italic;
+    font-size:13px;
+    letter-spacing:0.04em;
+    padding:6px 12px;
+    border-radius:3px;
+    transform:rotate(-2deg);
+  }
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:34px;margin:0;letter-spacing:-0.01em;}
+  .subtitle{font-size:13px;color:var(--muted);margin-top:4px;}
+  .today-count{text-align:right;font-family:'Fraunces',serif;}
+  .today-count .n{font-size:40px;font-weight:700;line-height:1;color:var(--amber-strong);}
+  .today-count .l{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);}
+  #profile-switcher:hover h1{opacity:0.8;}
+  #profile-list > div:hover{background:rgba(11,11,11,0.05);}
+
+  /* Esporta/Cancella dati riservati solo all'admin */
+  body.role-guest #export-backup-btn,
+  body.role-guest #reset-all-btn,
+  body.role-guest #import-backup-btn,
+  body.role-editor #export-backup-btn,
+  body.role-editor #reset-all-btn,
+  body.role-editor #import-backup-btn { display:none !important; }
+
+  /* EDITOR: nessuna aggiunta, nessuna eliminazione/duplicazione/modifica del contenuto,
+     ma puo' muoversi liberamente tra girato/editato/pubblicato (mai tornare a 'idea') */
+  body.role-editor .add-form:not(.filter-bar),
+  body.role-editor .agenda-actions [data-act="dup"],
+  body.role-editor .agenda-actions [data-act="del"],
+  body.role-editor .agenda-actions [data-act="edit"] { display:none !important; }
+  /* Impostazioni target e duplicazione giorno restano riservate all'admin;
+     l'assegnazione di quale contenuto occupa uno slot resta di sola lettura per l'editor,
+     ma la conferma di pubblicazione ([data-publish]) resta attiva */
+  body.role-editor .target-settings button,
+  body.role-editor #dup-day-btn { display:none !important; }
+  body.role-editor .target-settings input,
+  body.role-editor .slot select { pointer-events:none; opacity:0.7; }
+
+  .ret-card{background:var(--ink-2);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-bottom:12px;border-left:4px solid var(--muted);box-shadow:0 1px 2px rgba(11,11,11,0.04);}
+  .ret-card.ok{border-left-color:var(--teal);}
+  .ret-card.warn{border-left-color:var(--amber-strong);}
+  .ret-card.critical{border-left-color:var(--red);}
+  .ret-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;flex-wrap:wrap;gap:8px;}
+  .ret-brand{font-family:'Fraunces',serif;font-size:18px;font-weight:600;}
+  .ret-badge{font-size:10px;text-transform:uppercase;letter-spacing:0.05em;font-weight:700;padding:4px 10px;border-radius:12px;}
+  .ret-badge.ok{background:rgba(42,120,214,0.14);color:var(--teal);}
+  .ret-badge.warn{background:rgba(150,103,3,0.14);color:var(--amber-strong);}
+  .ret-badge.critical{background:rgba(208,59,59,0.14);color:var(--red);}
+  .ret-meta{font-size:12px;color:var(--muted);margin-bottom:10px;}
+  .ret-stats{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:10px;}
+  .ret-stat{font-size:12px;}
+  .ret-stat .v{font-family:'Fraunces',serif;font-weight:700;font-size:16px;color:var(--paper);}
+  .ret-bar-bg{background:var(--paper-dim);height:8px;border-radius:5px;overflow:hidden;margin-bottom:10px;}
+  .ret-bar-fill{height:100%;border-radius:5px;transition:width .3s ease;}
+
+  .guide-box{
+    background:var(--ink-2);
+    border:1px solid var(--line);
+    border-left:3px solid var(--amber-strong);
+    border-radius:8px;
+    padding:14px 16px;
+    margin-bottom:18px;
+    box-shadow:0 1px 2px rgba(11,11,11,0.04);
+  }
+  .guide-box h4{font-family:'Fraunces',serif;font-size:14px;margin:0 0 6px;font-weight:600;}
+  .guide-box p{font-size:12.5px;color:var(--muted);line-height:1.5;margin:0 0 10px;}
+  .legend-row{display:flex;gap:16px;flex-wrap:wrap;font-size:11.5px;color:var(--paper);}
+  .legend-row .item{display:flex;align-items:center;gap:5px;}
+  .legend-row .dot{width:9px;height:9px;flex-shrink:0;}
+
+  .ret-timeline-table{border-collapse:collapse;font-size:11px;min-width:100%;}
+  .ret-timeline-table th, .ret-timeline-table td{padding:5px 8px;text-align:center;border:1px solid var(--line);white-space:nowrap;}
+  .ret-timeline-table th{color:var(--muted);font-weight:500;font-size:10px;text-transform:uppercase;}
+  .ret-timeline-table td.brand-col{text-align:left;font-family:'Fraunces',serif;font-weight:600;font-size:12px;color:var(--paper);position:sticky;left:0;background:var(--ink-2);}
+  .ret-timeline-table td.active-cell{background:var(--teal);}
+  .ret-timeline-table td.active-cell.warn{background:var(--amber);}
+  .ret-timeline-table td.active-cell.critical{background:var(--red);}
+
+  .tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
+  .tab-btn{
+    background:transparent;
+    border:1.5px solid var(--line);
+    color:var(--paper);
+    font-family:'Space Grotesk',sans-serif;
+    font-size:13px;
+    font-weight:500;
+    padding:9px 16px;
+    border-radius:20px;
+    cursor:pointer;
+    transition:all .15s ease;
+  }
+  .tab-btn.active{background:var(--paper);color:var(--ink-2);border-color:var(--paper);}
+  .tab-btn:hover:not(.active){border-color:var(--paper);}
+
+  .panel{display:none;}
+  .panel.active{display:block;}
+
+  .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
+  .stat-card{background:var(--ink-2);border:1px solid var(--line);border-radius:10px;padding:16px;box-shadow:0 1px 2px rgba(11,11,11,0.04);}
+  .stat-card .num{font-family:'Fraunces',serif;font-weight:700;font-size:28px;}
+  .stat-card .lbl{font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-top:2px;}
+  .stat-card.idea .num{color:var(--muted);}
+  .stat-card.girato .num{color:var(--amber-strong);}
+  .stat-card.editato .num{color:var(--green-editato);}
+  .stat-card.pubblicato .num{color:var(--red);}
+
+  .progress-block{background:var(--ink-2);border:1px solid var(--line);border-radius:10px;padding:18px 18px 16px;margin-bottom:24px;box-shadow:0 1px 2px rgba(11,11,11,0.04);}
+  .progress-block .top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;}
+  .progress-block .top .t{font-family:'Fraunces',serif;font-size:16px;font-weight:600;}
+  .progress-block .top .v{font-size:13px;color:var(--muted);}
+  .bar-bg{background:var(--paper-dim);height:10px;border-radius:6px;overflow:hidden;}
+  .bar-fill{background:linear-gradient(90deg,var(--amber),var(--red));height:100%;border-radius:6px;transition:width .3s ease;}
+
+  .add-form{background:var(--ink-2);border:1px solid var(--line);border-radius:10px;padding:18px;margin-bottom:22px;box-shadow:0 1px 2px rgba(11,11,11,0.04);}
+  .add-form h3{font-family:'Fraunces',serif;font-size:15px;margin:0 0 12px;font-weight:600;}
+  .form-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
+  select, input[type=text], input[type=number], input[type=date]{
+    background:var(--ink);
+    border:1px solid var(--line);
+    color:var(--paper);
+    padding:9px 12px;
+    border-radius:6px;
+    font-family:'Space Grotesk',sans-serif;
+    font-size:13px;
+  }
+  input[type=text]{flex:1;min-width:220px;}
+  input[type=number]{width:70px;}
+  .btn{
+    background:var(--red);
+    color:var(--ink-2);
+    border:none;
+    padding:9px 18px;
+    border-radius:6px;
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:13px;
+    cursor:pointer;
+    transition:opacity .15s;
+  }
+  .btn:hover{opacity:0.88;}
+  .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--paper);}
+  .btn.small{padding:6px 12px;font-size:12px;}
+
+  .pipeline{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+  .col{background:var(--ink-2);border-radius:10px;padding:12px;min-height:120px;border:1px solid var(--line);}
+  .col-head{font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:10px;display:flex;justify-content:space-between;}
+  .card{background:var(--paper);color:var(--ink);border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:12.5px;line-height:1.4;}
+  .card .tag{display:inline-block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;padding:2px 7px;border-radius:10px;margin-bottom:6px;}
+  .tag.shop{background:var(--teal);color:var(--ink-2);}
+  .tag.personal{background:var(--amber);color:var(--paper);}
+  .card .hook{margin-bottom:8px;}
+  .card .actions{display:flex;gap:6px;flex-wrap:wrap;}
+  .card .actions button{font-size:10px;padding:4px 8px;border-radius:5px;border:1px solid rgba(247,242,231,0.2);background:transparent;color:var(--ink);cursor:pointer;font-family:'Space Grotesk',sans-serif;}
+  .card .actions button:hover{background:rgba(247,242,231,0.08);}
+  .card .actions button.del{color:var(--red);border-color:var(--red);}
+  .empty-hint{color:var(--muted);font-size:12px;font-style:italic;padding:8px 4px;}
+  .card.edit-card{border:1.5px solid var(--teal);}
+
+  .agenda-group{margin-bottom:16px;}
+  .agenda-date-header{
+    font-family:'Fraunces',serif;
+    font-size:13px;
+    font-weight:600;
+    color:var(--amber-strong);
+    padding:6px 2px;
+    margin-bottom:6px;
+    border-bottom:1px solid var(--line);
+    display:flex;
+    justify-content:space-between;
+  }
+  .agenda-date-header .count{color:var(--muted);font-family:'Space Grotesk',sans-serif;font-weight:400;font-size:11px;}
+  .agenda-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:var(--ink-2);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:8px 10px;
+    margin-bottom:6px;
+    flex-wrap:wrap;
+    box-shadow:0 1px 2px rgba(11,11,11,0.03);
+  }
+  .agenda-row .dot{width:9px;height:9px;flex-shrink:0;}
+  .agenda-row .tag{flex-shrink:0;}
+  .agenda-title{flex:1;min-width:140px;font-size:12.5px;}
+  .agenda-actions{display:flex;gap:5px;flex-shrink:0;align-items:center;}
+  .agenda-actions button{font-size:10px;padding:4px 8px;border-radius:5px;border:1px solid var(--line);background:transparent;color:var(--paper);cursor:pointer;font-family:'Space Grotesk',sans-serif;}
+  .agenda-actions button:hover{border-color:var(--paper);}
+  .agenda-actions button.del{color:var(--red);border-color:var(--red);}
+  .agenda-edit-form{background:var(--ink-2);border:1.5px solid var(--teal);border-radius:8px;padding:12px;margin-bottom:6px;}
+
+  /* TARGET SETTINGS */
+  .target-settings{background:var(--ink-2);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-bottom:20px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;box-shadow:0 1px 2px rgba(11,11,11,0.04);}
+  .target-settings .grp{display:flex;align-items:center;gap:8px;}
+  .target-settings label{font-size:12px;color:var(--muted);}
+  .target-settings .tag{padding:3px 9px;border-radius:10px;font-size:10px;font-weight:700;text-transform:uppercase;}
+  .target-rule-row{display:flex;align-items:center;gap:10px;padding:7px 10px;background:var(--ink);border:1px solid var(--line);border-radius:6px;margin-bottom:6px;font-size:12px;}
+  .target-rule-row .del-rule{margin-left:auto;font-size:10px;color:var(--red);background:none;border:1px solid var(--red);border-radius:5px;padding:3px 8px;cursor:pointer;}
+
+  /* CALENDAR NAV */
+  .cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;}
+  .cal-nav-left{display:flex;align-items:center;gap:10px;}
+  .cal-nav button.nav-arrow{background:var(--ink-2);border:1px solid var(--line);color:var(--paper);width:34px;height:34px;border-radius:8px;cursor:pointer;font-size:16px;}
+  .cal-nav button.nav-arrow:hover{border-color:var(--paper);}
+  .cal-title{font-family:'Fraunces',serif;font-size:19px;font-weight:600;min-width:180px;text-align:center;}
+  .view-switch{display:flex;gap:6px;}
+  .view-switch button{background:transparent;border:1px solid var(--line);color:var(--paper);padding:7px 14px;border-radius:16px;font-size:12px;cursor:pointer;font-family:'Space Grotesk',sans-serif;}
+  .view-switch button.active{background:var(--teal);border-color:var(--teal);color:var(--ink-2);}
+
+  /* MONTH VIEW */
+  .month-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
+  .month-dow{font-size:10px;text-transform:uppercase;color:var(--muted);text-align:center;padding-bottom:4px;letter-spacing:0.05em;}
+  .month-cell{
+    background:var(--ink-2);
+    border:1px solid var(--line);
+    border-radius:8px;
+    min-height:96px;
+    padding:6px;
+    cursor:pointer;
+    transition:border-color .15s;
+    overflow:hidden;
+  }
+  .month-cell:hover{border-color:var(--amber-strong);}
+  .month-cell.outside{opacity:0.4;}
+  .month-cell.today{border-color:var(--red);border-width:2px;}
+  .month-cell .dnum{font-size:12px;font-weight:600;margin-bottom:5px;}
+  .cell-line{
+    display:flex;
+    align-items:center;
+    gap:4px;
+    font-size:9px;
+    line-height:1.3;
+    color:var(--paper);
+    opacity:0.85;
+    margin-bottom:2px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .cell-line .chk{flex-shrink:0;font-size:12px;font-weight:700;}
+  .cell-line .lbl-txt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .week-cell-line{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:11px;
+    line-height:1.4;
+    color:var(--paper);
+    margin-bottom:4px;
+    padding:4px 6px;
+    background:rgba(11,11,11,0.04);
+    border-radius:5px;
+  }
+  .week-cell-line .chk{flex-shrink:0;font-size:15px;font-weight:700;line-height:1;}
+  .week-cell-line .lbl-txt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .dots{display:flex;gap:3px;flex-wrap:wrap;}
+  .dot{width:7px;height:7px;border-radius:50%;}
+  .dot.empty{background:transparent;border:1px solid var(--muted);}
+  .dot.idea{background:var(--muted);}
+  .dot.girato{background:var(--amber-strong);}
+  .dot.editato{background:var(--green-editato);}
+  .dot.pubblicato{background:var(--red);}
+
+  /* WEEK VIEW */
+  .week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;}
+  .day-col{background:var(--ink-2);border:1px solid var(--line);border-radius:10px;padding:10px;cursor:pointer;}
+  .day-col:hover{border-color:var(--amber-strong);}
+  .day-col.today{border-color:var(--red);}
+  .day-col h4{font-family:'Fraunces',serif;font-size:13px;margin:0 0 2px;text-align:center;font-weight:600;}
+  .day-col .dnum{text-align:center;font-size:10px;color:var(--muted);margin-bottom:8px;}
+  .day-col .dots{justify-content:center;margin-top:4px;}
+
+  /* DAY VIEW */
+  .day-detail{background:var(--ink-2);border:1px solid var(--line);border-radius:10px;padding:20px;}
+  .day-detail h3{font-family:'Fraunces',serif;font-size:20px;margin:0 0 16px;}
+  .slot{background:var(--ink);border:1px solid var(--line);border-radius:6px;padding:10px;margin-bottom:8px;}
+  .slot .slot-label{font-size:10px;text-transform:uppercase;color:var(--muted);letter-spacing:0.05em;margin-bottom:5px;}
+  .slot select{width:100%;font-size:12px;padding:7px 8px;}
+  .slot.filled{border-color:var(--amber-strong);}
+  .slot-group-label{font-size:12px;font-weight:600;color:var(--teal);margin:14px 0 8px;text-transform:uppercase;letter-spacing:0.04em;}
+  .slot-group-label.personal{color:var(--amber-strong);}
+
+  /* YEAR VIEW */
+  .year-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+  .mini-month{background:var(--ink-2);border:1px solid var(--line);border-radius:10px;padding:10px;}
+  .mini-month h5{font-family:'Fraunces',serif;font-size:13px;margin:0 0 8px;text-align:center;font-weight:600;cursor:pointer;}
+  .mini-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+  .mini-cell{aspect-ratio:1;border-radius:2px;background:rgba(11,11,11,0.05);cursor:pointer;}
+  .mini-cell.has-idea{background:var(--muted);}
+  .mini-cell.has-girato{background:var(--amber-strong);}
+  .mini-cell.has-editato{background:var(--green-editato);}
+  .mini-cell.has-pubblicato{background:var(--red);}
+  .mini-cell.today{outline:1.5px solid var(--paper);}
+  .mini-cell.outside{opacity:0.25;}
+
+  @media (max-width:800px){
+    .stat-row{grid-template-columns:repeat(2,1fr);}
+    .pipeline{grid-template-columns:repeat(2,1fr);}
+    .week-grid{grid-template-columns:repeat(2,1fr);}
+    .year-grid{grid-template-columns:repeat(2,1fr);}
+    .month-grid{grid-template-columns:repeat(7,minmax(34px,1fr));}
+  }
+</style>
+</head>
+<body>
+
+<div id="login-overlay" style="position:fixed;inset:0;background:#F9F9F7;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:#FFFFFF;padding:36px 32px;border-radius:16px;max-width:380px;width:100%;border:1px solid rgba(11,11,11,0.08);box-shadow:0 4px 24px rgba(11,11,11,0.08);">
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKAAAACgBAMAAAB54XoeAAAAMFBMVEUFBQUuLi5vb2+wsK+fn5+MjIxSUlLY2Njt7Ozw7+/39/fR0dHs7Ova2tq/v7/f39/hMFP3AAADV0lEQVRo3u2VsU9TURTG72uhDqJ5JUogMrQgDtWhQY2RqQmPBWPCTDQhMWLSSScSnXQxstXJc3VpSwvntgO4GPvC4AodTIwLYfCvcHLwnHtfaSG80oTFmPMb2tP7Xr977jnfO08pQRAEQRAEQRAEQRAEQRCEf5a0P/Ct0/NBECxku3EQzGf4x5MgmI3uGb337u0sSU4H8054OrgbKzhnLJ/9bmzyfKFlzKa75armxaqvitElz5h6vCBYzJturPlfHgc2n9SeW32vhrbACiVxPX+WIJhCFBsnmEAKlviOIgKlSIoZbw8adgUgvqZzmg+EADUW5FhbwSRStM0Jkh6GX0mxrnJac31bsKH6ZFgbW336khJYoXgjzfD2E4gayxRcQGhmlXcLYVNdRP2dk9ff+glyWRIaKJ05TjMiB1X3Mwd6h2vaojOnECu8hc0zVrDCX+NIwr2CtFHRVuwAXLPHjdlWi9D0aYuGOlOQKlXrFfS0Lk0gtTmFrrMqsb/2gvbVBWpNva+gu9qibXsEqU75JFKbh9G25mgZSkOo8wMI5qBJcXWKyNom60yCtS6jM08ENXgCjT+AYBG2fGchU7NNBt9bh3KnA6vMir2t1VPp+BqyTUiQ/AgfKq7J1lJqBMlPSq3zTmVrz76mOU3QLthlbmckaB+/EjcLdD/TdAWLgJ0j0wKdtsRe0v4ld2QSRE1Lahmwn2m6gsebQv3YSaevUUPo4Si4I4N+rdjVWB9IsEVF69omaQcCPX3bZJLntDAzc90FiWM2ihc8YexJW0wqaTlxZGxnv9SAgqRQ7hEsuvbQDKJqbkZJ22IOmCENUdq/Kxi1B6nNi24+UpHtEIwyHM32FRxtIY/nI0FvT1dvE/dpdRyxQca5guxMK0j6KY0rsYKf2m0esBWOm4ft9p/DQso1gB+TJTqjbiw8IP+VuoIjdjCeLshnAw0m05nY9CZKOq+4ybAMtuPg/OyOTK4tx2boXim/Vc9LatI9Htz7kho2btXZqyMIsYLRa7QnNr+KpumuHvCkeMYVMU1XtBTPWa5FXK8fhq/C8E42isMva2G4W3gc/nRXH4U/6PMmHfljxq2k9ncL/EJo+OocjE3dOPF/71x6giAIgiAIgiAIgiAIgiAI/zF/AeZR2K+eCEtvAAAAAElFTkSuQmCC" alt="DEAGY" style="height:44px;width:44px;border-radius:10px;display:block;margin-bottom:18px;">
+    <h2 style="font-family:'Fraunces',serif;color:#0B0B0B;margin:0 0 6px;font-size:22px;">Publishing Calendar</h2>
+    <p style="color:#898781;font-size:13px;line-height:1.5;margin:0 0 22px;">Content scheduling, retainer tracking, and earnings overview for TikTok Shop creators. Sign in with your account to continue.</p>
+    <div style="border-top:1px solid rgba(11,11,11,0.08);margin-bottom:20px;"></div>
+    <h3 style="font-family:'Fraunces',serif;color:#0B0B0B;margin:0 0 6px;font-size:16px;">Sign in</h3>
+    <p style="color:#898781;font-size:12px;margin:0 0 16px;">Enter your credentials to continue.</p>
+    <input type="email" id="login-email" placeholder="Email" autocomplete="username" style="width:100%;box-sizing:border-box;background:#F9F9F7;border:1px solid rgba(11,11,11,0.12);color:#0B0B0B;padding:10px 12px;border-radius:6px;font-family:'Space Grotesk',sans-serif;font-size:14px;margin-bottom:10px;">
+    <input type="password" id="login-password" placeholder="Password" autocomplete="current-password" style="width:100%;box-sizing:border-box;background:#F9F9F7;border:1px solid rgba(11,11,11,0.12);color:#0B0B0B;padding:10px 12px;border-radius:6px;font-family:'Space Grotesk',sans-serif;font-size:14px;margin-bottom:14px;">
+    <button id="login-btn" style="width:100%;background:#D03B3B;color:#FFFFFF;border:none;padding:11px;border-radius:6px;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;cursor:pointer;">Sign in</button>
+    <div id="login-error" style="color:#D03B3B;font-size:12px;margin-top:12px;min-height:16px;"></div>
+    <a href="#" id="guest-link" style="display:flex;align-items:center;justify-content:center;gap:6px;text-align:center;margin-top:18px;padding:10px 12px;border:1px solid rgba(11,11,11,0.1);border-radius:8px;color:#52514E;font-size:12px;font-weight:500;text-decoration:none;background:#FCFCFB;">🎬 Try the demo — sample data, nothing real</a>
+  </div>
+</div>
+<div class="wrap">
+
+  <header>
+    <div class="slate">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKAAAACgBAMAAAB54XoeAAAAMFBMVEUFBQUuLi5vb2+wsK+fn5+MjIxSUlLY2Njt7Ozw7+/39/fR0dHs7Ova2tq/v7/f39/hMFP3AAADV0lEQVRo3u2VsU9TURTG72uhDqJ5JUogMrQgDtWhQY2RqQmPBWPCTDQhMWLSSScSnXQxstXJc3VpSwvntgO4GPvC4AodTIwLYfCvcHLwnHtfaSG80oTFmPMb2tP7Xr977jnfO08pQRAEQRAEQRAEQRAEQRCEf5a0P/Ct0/NBECxku3EQzGf4x5MgmI3uGb337u0sSU4H8054OrgbKzhnLJ/9bmzyfKFlzKa75armxaqvitElz5h6vCBYzJturPlfHgc2n9SeW32vhrbACiVxPX+WIJhCFBsnmEAKlviOIgKlSIoZbw8adgUgvqZzmg+EADUW5FhbwSRStM0Jkh6GX0mxrnJac31bsKH6ZFgbW336khJYoXgjzfD2E4gayxRcQGhmlXcLYVNdRP2dk9ff+glyWRIaKJ05TjMiB1X3Mwd6h2vaojOnECu8hc0zVrDCX+NIwr2CtFHRVuwAXLPHjdlWi9D0aYuGOlOQKlXrFfS0Lk0gtTmFrrMqsb/2gvbVBWpNva+gu9qibXsEqU75JFKbh9G25mgZSkOo8wMI5qBJcXWKyNom60yCtS6jM08ENXgCjT+AYBG2fGchU7NNBt9bh3KnA6vMir2t1VPp+BqyTUiQ/AgfKq7J1lJqBMlPSq3zTmVrz76mOU3QLthlbmckaB+/EjcLdD/TdAWLgJ0j0wKdtsRe0v4ld2QSRE1Lahmwn2m6gsebQv3YSaevUUPo4Si4I4N+rdjVWB9IsEVF69omaQcCPX3bZJLntDAzc90FiWM2ihc8YexJW0wqaTlxZGxnv9SAgqRQ7hEsuvbQDKJqbkZJ22IOmCENUdq/Kxi1B6nNi24+UpHtEIwyHM32FRxtIY/nI0FvT1dvE/dpdRyxQca5guxMK0j6KY0rsYKf2m0esBWOm4ft9p/DQso1gB+TJTqjbiw8IP+VuoIjdjCeLshnAw0m05nY9CZKOq+4ybAMtuPg/OyOTK4tx2boXim/Vc9LatI9Htz7kho2btXZqyMIsYLRa7QnNr+KpumuHvCkeMYVMU1XtBTPWa5FXK8fhq/C8E42isMva2G4W3gc/nRXH4U/6PMmHfljxq2k9ncL/EJo+OocjE3dOPF/71x6giAIgiAIgiAIgiAIgiAI/zF/AeZR2K+eCEtvAAAAAElFTkSuQmCC" alt="DEAGY" style="height:36px;width:36px;border-radius:8px;display:block;">
+      <div style="position:relative;">
+        <button id="profile-switcher" style="background:none;border:none;cursor:pointer;padding:0;display:flex;align-items:center;gap:8px;">
+          <h1 id="profile-title" style="font-family:'Fraunces',serif;font-weight:600;font-size:34px;margin:0;letter-spacing:-0.01em;color:var(--paper);">@the.realitalian</h1>
+          <span style="font-size:16px;color:var(--muted);">▾</span>
+        </button>
+        <div id="profile-menu" style="display:none;position:absolute;top:calc(100% + 8px);left:0;background:var(--ink-2);border:1px solid var(--line);border-radius:10px;padding:8px;min-width:220px;z-index:20;box-shadow:0 8px 24px rgba(0,0,0,0.4);">
+          <div id="profile-list"></div>
+          <div style="border-top:1px solid var(--line);margin-top:8px;padding-top:8px;">
+            <input type="text" id="new-profile-input" placeholder="@nuovoprofilo" style="width:100%;margin-bottom:6px;">
+            <button class="btn small" id="add-profile-btn" style="width:100%;">+ Aggiungi profilo</button>
+          </div>
+        </div>
+      </div>
+      <div style="position:relative;">
+        <button id="notif-bell" style="position:relative;background:none;border:none;cursor:pointer;padding:6px;display:none;">
+          <span style="font-size:20px;">🔔</span>
+          <span id="notif-badge" style="position:absolute;top:0;right:0;background:var(--red);color:var(--ink-2);font-size:10px;font-weight:700;border-radius:10px;min-width:16px;height:16px;display:none;align-items:center;justify-content:center;padding:0 4px;">0</span>
+        </button>
+        <div id="notif-panel" style="display:none;position:absolute;top:calc(100% + 8px);right:0;background:var(--ink-2);border:1px solid var(--line);border-radius:10px;min-width:280px;max-width:340px;max-height:360px;overflow-y:auto;z-index:30;box-shadow:0 8px 24px rgba(0,0,0,0.4);">
+          <div style="padding:10px 14px;border-bottom:1px solid var(--line);font-family:'Fraunces',serif;font-size:13px;font-weight:600;display:flex;justify-content:space-between;align-items:center;">
+            <span id="notif-panel-title">Notifiche</span>
+            <button id="notif-clear-btn" style="background:none;border:none;color:var(--muted);font-size:11px;cursor:pointer;text-decoration:underline;">Segna tutte come lette</button>
+          </div>
+          <div id="notif-list"></div>
+        </div>
+      </div>
+    </div>
+    <div class="today-count">
+      <div class="n" id="todayN">0</div>
+      <div class="l" id="todayN-label" data-i18n="today_published">pubblicati oggi</div>
+      <select id="lang-select" style="margin-top:8px;font-size:11px;padding:4px 8px;">
+        <option value="it">🇮🇹 Italiano</option>
+        <option value="en">🇬🇧 English</option>
+        <option value="es">🇪🇸 Español</option>
+      </select>
+      <button id="logout-btn" class="btn ghost small" style="margin-top:8px;padding:4px 10px;font-size:11px;">Sign out</button>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="dashboard" data-i18n="tab_dashboard">Quadro generale</button>
+    <button class="tab-btn" data-tab="backlog" data-i18n="tab_backlog">Backlog & pipeline</button>
+    <button class="tab-btn" data-tab="calendario" data-i18n="tab_calendario">Calendario</button>
+    <button class="tab-btn" data-tab="retainer" data-i18n="tab_retainer">Retainer</button>
+    <button class="tab-btn" data-tab="affiliazioni" data-i18n="tab_affiliazioni">Affiliazioni</button>
+    <button class="tab-btn" data-tab="guadagni" data-i18n="tab_guadagni">Riepilogo guadagni</button>
+    <button class="btn ghost small" id="export-backup-btn" data-i18n="export_backup" style="margin-left:auto;">Esporta backup (JSON)</button>
+    <button class="btn ghost small" id="reset-all-btn" data-i18n="reset_all">Cancella tutti i dati</button>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="panel active" id="panel-dashboard">
+    <div class="progress-block" style="border:1.5px solid var(--green-editato);">
+      <div class="top"><span class="t" data-i18n="editcount_title">Conteggio video editati dall'editore</span></div>
+      <div class="form-row" style="margin-top:6px;">
+        <select id="editcount-period">
+          <option value="giorno" data-i18n="period_giorno">Giorno</option>
+          <option value="settimana" data-i18n="period_settimana">Settimana</option>
+          <option value="mese" selected data-i18n="period_mese">Mese</option>
+          <option value="anno" data-i18n="period_anno">Anno</option>
+          <option value="personalizzato" data-i18n="period_custom">Personalizzato</option>
+        </select>
+        <input type="date" id="editcount-day" style="display:none;">
+        <input type="date" id="editcount-week-anchor" style="display:none;">
+        <input type="month" id="editcount-month">
+        <input type="number" id="editcount-year" style="display:none;width:90px;">
+        <input type="date" id="editcount-start" style="display:none;">
+        <span id="editcount-dash" style="display:none;align-self:center;color:var(--muted);">→</span>
+        <input type="date" id="editcount-end" style="display:none;">
+      </div>
+      <div style="text-align:center;margin-top:14px;">
+        <div style="font-family:'Fraunces',serif;font-size:42px;font-weight:700;color:var(--green-editato);line-height:1;" id="editcount-number">0</div>
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-top:4px;" data-i18n="editcount_label">video editati nel periodo</div>
+      </div>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-card idea"><div class="num" id="cnt-idea">0</div><div class="lbl" data-i18n="stat_idea">Da girare</div></div>
+      <div class="stat-card girato"><div class="num" id="cnt-girato">0</div><div class="lbl" data-i18n="stat_girato">Girati</div></div>
+      <div class="stat-card editato"><div class="num" id="cnt-editato">0</div><div class="lbl" data-i18n="stat_editato">Editati</div></div>
+      <div class="stat-card pubblicato"><div class="num" id="cnt-pubblicato">0</div><div class="lbl" data-i18n="stat_pubblicato">Pubblicati (tot)</div></div>
+    </div>
+    <div class="progress-block">
+      <div class="top"><span class="t" data-i18n="today_vs_target">Pubblicati oggi (rispetto al target)</span><span class="v" id="today-progress-txt">0 / 4</span></div>
+      <div class="bar-bg"><div class="bar-fill" id="today-bar" style="width:0%"></div></div>
+    </div>
+    <div class="progress-block">
+      <div class="top"><span class="t" data-i18n="week_published">Pubblicati questa settimana</span><span class="v" id="week-progress-txt">0 / 0</span></div>
+      <div class="bar-bg"><div class="bar-fill" id="week-bar" style="width:0%"></div></div>
+    </div>
+
+    <div class="progress-block">
+      <div class="top"><span class="t" data-i18n="report_title">Report video pubblicati per marca</span></div>
+      <div class="form-row" style="margin-top:6px;">
+        <select id="report-period">
+          <option value="giorno" data-i18n="period_giorno">Giorno</option>
+          <option value="settimana" data-i18n="period_settimana">Settimana</option>
+          <option value="mese" selected data-i18n="period_mese">Mese</option>
+          <option value="anno" data-i18n="period_anno">Anno</option>
+          <option value="personalizzato" data-i18n="period_custom">Personalizzato</option>
+        </select>
+        <input type="date" id="report-day" style="display:none;">
+        <input type="date" id="report-week-anchor" style="display:none;">
+        <input type="month" id="report-month">
+        <input type="number" id="report-year" style="display:none;width:90px;">
+        <input type="date" id="report-start" style="display:none;">
+        <span id="report-dash" style="display:none;align-self:center;color:var(--muted);">→</span>
+        <input type="date" id="report-end" style="display:none;">
+      </div>
+      <div id="report-results"></div>
+    </div>
+  </div>
+
+  <!-- BACKLOG -->
+  <div class="panel" id="panel-backlog">
+    <div class="guide-box">
+      <h4 data-i18n="guide_backlog_title">Come si lavora qui</h4>
+      <p data-i18n="guide_backlog_text">Apri il Calendario per vedere quali video pubblicare per primi...</p>
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-bottom:6px;" data-i18n="legend_title">Legenda colori</div>
+      <div class="legend-row">
+        <span class="item"><span class="dot idea"></span><span data-i18n="legend_idea">grigio = da girare</span></span>
+        <span class="item"><span class="dot girato"></span><span data-i18n="legend_girato">ambra = girato</span></span>
+        <span class="item"><span class="dot editato"></span><span data-i18n="legend_editato">verde = editato</span></span>
+        <span class="item"><span class="dot pubblicato"></span><span data-i18n="legend_pubblicato">rosso = pubblicato</span></span>
+      </div>
+    </div>
+    <div class="add-form">
+      <h3 data-i18n="add_form_title">Aggiungi contenuto al backlog</h3>
+      <div class="form-row">
+        <select id="new-type">
+          <option value="shop" data-i18n="shop">Shop</option>
+          <option value="personal" data-i18n="personal_brand">Personal brand</option>
+        </select>
+        <input type="text" id="new-brand" list="brand-list" data-i18n-placeholder="add_form_marca" placeholder="Marca (es. Rainbow Light)">
+        <datalist id="brand-list"></datalist>
+        <input type="text" id="new-supptype" list="supptype-list" data-i18n-placeholder="add_form_tipologia" placeholder="Tipologia di supplemento (es. Magnesio)">
+        <datalist id="supptype-list"></datalist>
+      </div>
+      <div class="form-row">
+        <input type="text" id="new-hook" data-i18n-placeholder="add_form_nome_video" placeholder="Nome video (anche solo il nome del file)...">
+      </div>
+      <div class="form-row">
+        <label style="font-size:12px;color:var(--muted);align-self:center;" data-i18n="add_stato">Stato:</label>
+        <select id="new-status">
+          <option value="idea" data-i18n="filter_daGirare">Da girare</option>
+          <option value="girato" data-i18n="filter_girato">Girato</option>
+          <option value="editato" data-i18n="filter_editato">Editato</option>
+        </select>
+        <label style="font-size:12px;color:var(--muted);align-self:center;" data-i18n="add_giorno_pub">Giorno di pubblicazione:</label>
+        <input type="date" id="new-date">
+        <button type="button" id="new-date-clear" class="btn ghost small" data-i18n="add_no_date">Nessuna data</button>
+        <button class="btn" id="add-btn" data-i18n="add_al_calendario">Aggiungi al calendario</button>
+      </div>
+      <div id="new-date-hint" style="font-size:11px;color:var(--muted);margin-top:4px;display:none;" data-i18n="add_no_date_hint">Senza data, il contenuto va nel backlog senza essere assegnato al calendario.</div>
+    </div>
+
+    <div class="add-form">
+      <h3 data-i18n="bulk_title">Aggiunta rapida per periodo</h3>
+      <div class="form-row">
+        <select id="bulk-type">
+          <option value="shop" data-i18n="shop">Shop</option>
+          <option value="personal" data-i18n="personal_brand">Personal brand</option>
+        </select>
+        <input type="text" id="bulk-brand" list="brand-list" data-i18n-placeholder="bulk_marca" placeholder="Marca">
+        <input type="text" id="bulk-supptype" list="supptype-list" data-i18n-placeholder="bulk_tipologia" placeholder="Tipologia supplemento">
+      </div>
+      <div class="form-row">
+        <label style="font-size:12px;color:var(--muted);align-self:center;" data-i18n="bulk_dal">Dal:</label>
+        <input type="date" id="bulk-start">
+        <label style="font-size:12px;color:var(--muted);align-self:center;" data-i18n="bulk_al">Al:</label>
+        <input type="date" id="bulk-end">
+        <select id="bulk-days-mode">
+          <option value="tutti" data-i18n="bulk_tutti_giorni">Tutti i giorni</option>
+          <option value="specifici" data-i18n="bulk_giorni_specifici">Giorni specifici del mese</option>
+          <option value="nessuna" data-i18n="bulk_nessuna_data">Nessuna data (solo quantità)</option>
+        </select>
+        <input type="text" id="bulk-specific-days" data-i18n-placeholder="bulk_giorni_placeholder" placeholder="es. 11,13,15,17" style="display:none;width:160px;">
+      </div>
+      <div class="form-row">
+        <label style="font-size:12px;color:var(--muted);align-self:center;" data-i18n="add_stato">Stato:</label>
+        <select id="bulk-status">
+          <option value="idea" data-i18n="filter_daGirare">Da girare</option>
+          <option value="girato" data-i18n="filter_girato">Girato</option>
+          <option value="editato" data-i18n="filter_editato">Editato</option>
+          <option value="pubblicato" data-i18n="th_pubblicato">Pubblicato</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <input type="number" id="bulk-count" min="1" value="1" data-i18n-placeholder="bulk_video_giorno" placeholder="Video/giorno" style="width:120px;">
+        <input type="text" id="bulk-name" data-i18n-placeholder="bulk_nome_base" placeholder="Nome video base (opzionale)">
+        <button class="btn" id="bulk-generate-btn" data-i18n="bulk_genera">Genera contenuti</button>
+      </div>
+      <div id="bulk-preview" style="font-size:11px;color:var(--muted);margin-top:4px;"></div>
+    </div>
+
+    <div class="add-form filter-bar" style="display:flex;gap:10px;align-items:center;padding:14px 18px;">
+      <input type="text" id="backlog-search" data-i18n-placeholder="search_placeholder" placeholder="Cerca marca, tipologia, nome video..." style="flex:1;">
+      <select id="backlog-status-filter">
+        <option value="all" data-i18n="filter_active">Attivi (esclude pubblicati)</option>
+        <option value="idea" data-i18n="filter_daGirare">Da girare</option>
+        <option value="girato" data-i18n="filter_girato">Girato</option>
+        <option value="editato" data-i18n="filter_editato">Editato</option>
+        <option value="pubblicato" data-i18n="filter_archivio">Archivio pubblicati</option>
+      </select>
+    </div>
+
+    <div id="backlog-agenda"></div>
+  </div>
+
+  <!-- CALENDARIO -->
+  <div class="panel" id="panel-calendario">
+
+    <div class="guide-box">
+      <h4 data-i18n="guide_calendario_title">Come leggere il calendario</h4>
+      <p data-i18n="guide_calendario_text">Ogni pallino colorato indica lo stato di un video in quel giorno...</p>
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-bottom:6px;" data-i18n="legend_title">Legenda colori</div>
+      <div class="legend-row">
+        <span class="item"><span class="dot idea"></span><span data-i18n="legend_idea">grigio = da girare</span></span>
+        <span class="item"><span class="dot girato"></span><span data-i18n="legend_girato">ambra = girato</span></span>
+        <span class="item"><span class="dot editato"></span><span data-i18n="legend_editato">verde = editato</span></span>
+        <span class="item"><span class="dot pubblicato"></span><span data-i18n="legend_pubblicato">rosso = pubblicato</span></span>
+      </div>
+    </div>
+
+    <div class="target-settings" style="flex-direction:column;align-items:stretch;">
+      <strong style="font-family:'Fraunces',serif;font-size:13px;" data-i18n="target_title">Target giornalieri</strong>
+      <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-top:10px;">
+        <div class="grp">
+          <label style="font-size:12px;color:var(--muted);" data-i18n="target_dal">Dal:</label>
+          <input type="date" id="target-rule-start">
+        </div>
+        <div class="grp">
+          <span class="tag shop" data-i18n="shop">Shop</span>
+          <input type="number" id="target-shop" min="0" max="20" style="width:60px;">
+          <label data-i18n="target_video_giorno">video/giorno</label>
+        </div>
+        <div class="grp">
+          <span class="tag personal" data-i18n="personal_brand">Personal</span>
+          <input type="number" id="target-personal" min="0" max="20" style="width:60px;">
+          <select id="target-personal-mode" style="width:auto;">
+            <option value="giorno" data-i18n="target_al_giorno">al giorno</option>
+            <option value="settimana" data-i18n="target_a_settimana">a settimana</option>
+          </select>
+        </div>
+        <button class="btn small" id="save-targets" data-i18n="target_add_rule">Aggiungi regola</button>
+        <span id="targets-saved-msg" style="font-size:11px;color:var(--teal);display:none;" data-i18n="target_saved">Salvato ✓</span>
+      </div>
+      <div id="target-rules-list" style="margin-top:12px;"></div>
+    </div>
+
+    <div class="cal-nav">
+      <div class="cal-nav-left">
+        <button class="nav-arrow" id="nav-prev">‹</button>
+        <div class="cal-title" id="cal-title"></div>
+        <button class="nav-arrow" id="nav-next">›</button>
+        <button class="btn ghost small" id="nav-today" data-i18n="nav_today">Oggi</button>
+      </div>
+      <div class="view-switch">
+        <button data-view="day" data-i18n="view_giorno">Giorno</button>
+        <button data-view="week" data-i18n="view_settimana">Settimana</button>
+        <button data-view="month" class="active" data-i18n="view_mese">Mese</button>
+        <button data-view="year" data-i18n="view_anno">Anno</button>
+      </div>
+    </div>
+
+    <div id="cal-body"></div>
+  </div>
+
+  <!-- RETAINER -->
+  <div class="panel" id="panel-retainer">
+    <div class="add-form">
+      <h3 data-i18n="ret_new">Nuovo retainer</h3>
+      <div class="form-row">
+        <input type="text" id="ret-brand" list="brand-list" data-i18n-placeholder="ret_marca" placeholder="Marca">
+        <input type="number" id="ret-videos" min="1" data-i18n-placeholder="ret_video_pattuiti" placeholder="Video pattuiti" style="width:120px;">
+      </div>
+      <div class="form-row">
+        <label style="font-size:12px;color:var(--muted);align-self:center;" data-i18n="ret_inizio">Inizio:</label>
+        <input type="date" id="ret-start">
+        <label style="font-size:12px;color:var(--muted);align-self:center;" data-i18n="ret_fine">Fine:</label>
+        <input type="date" id="ret-end">
+      </div>
+      <div class="form-row">
+        <input type="number" id="ret-price" min="0" step="0.01" data-i18n-placeholder="ret_prezzo" placeholder="Prezzo pattuito ($)" style="width:160px;">
+        <select id="ret-price-type">
+          <option value="video" data-i18n="ret_per_video">$ per video</option>
+          <option value="total" data-i18n="ret_totale_periodo">$ totale periodo</option>
+        </select>
+        <select id="ret-payment-method">
+          <option value="Bonifico bancario">Bonifico bancario</option>
+          <option value="BILL">BILL</option>
+          <option value="PayPal">PayPal</option>
+          <option value="Altro">Altro</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <input type="text" id="ret-notes" data-i18n-placeholder="ret_note" placeholder="Note (opzionale)">
+        <button class="btn" id="add-retainer-btn" data-i18n="ret_aggiungi">Aggiungi retainer</button>
+      </div>
+    </div>
+
+    <div class="stat-row" id="retainer-summary" style="grid-template-columns:repeat(4,1fr);">
+      <div class="stat-card"><div class="num" id="ret-sum-earn" style="color:var(--amber-strong);">$0</div><div class="lbl" data-i18n="ret_summary_earn">Guadagno totale contratti</div></div>
+      <div class="stat-card"><div class="num" id="ret-sum-total">0</div><div class="lbl" data-i18n="ret_summary_total">Retainer presi</div></div>
+      <div class="stat-card"><div class="num" id="ret-sum-progress" style="color:var(--teal);">0</div><div class="lbl" data-i18n="ret_summary_progress">In corso</div></div>
+      <div class="stat-card"><div class="num" id="ret-sum-done" style="color:var(--red);">0</div><div class="lbl" data-i18n="ret_summary_done">Terminati</div></div>
+    </div>
+
+    <div class="progress-block">
+      <div class="top"><span class="t" data-i18n="ret_timeline_title">Calendario retainer per mese</span></div>
+      <div id="retainer-timeline" style="overflow-x:auto;margin-top:10px;"></div>
+    </div>
+
+    <div id="retainer-list"></div>
+  </div>
+
+  <!-- AFFILIAZIONI -->
+  <div class="panel" id="panel-affiliazioni">
+    <div class="add-form">
+      <h3 data-i18n="aff_add">Aggiungi guadagno affiliazioni</h3>
+      <div class="form-row">
+        <label style="font-size:12px;color:var(--muted);align-self:center;" data-i18n="aff_mese">Mese:</label>
+        <input type="month" id="aff-month">
+        <input type="number" id="aff-amount" min="0" step="0.01" data-i18n-placeholder="aff_importo" placeholder="Importo generato ($)" style="width:180px;">
+        <input type="text" id="aff-notes" data-i18n-placeholder="aff_note" placeholder="Note (opzionale)">
+        <button class="btn" id="add-aff-btn" data-i18n="aff_aggiungi">Aggiungi</button>
+      </div>
+    </div>
+    <div id="affiliate-list"></div>
+  </div>
+
+  <!-- RIEPILOGO GUADAGNI -->
+  <div class="panel" id="panel-guadagni">
+    <div class="progress-block">
+      <div class="top"><span class="t" data-i18n="earn_periodo">Periodo</span></div>
+      <div class="form-row" style="margin-top:6px;">
+        <select id="earn-period">
+          <option value="giorno" data-i18n="period_giorno">Giorno</option>
+          <option value="settimana" data-i18n="period_settimana">Settimana</option>
+          <option value="mese" selected data-i18n="period_mese">Mese</option>
+          <option value="anno" data-i18n="period_anno">Anno</option>
+          <option value="personalizzato" data-i18n="period_custom">Personalizzato</option>
+        </select>
+        <input type="date" id="earn-day" style="display:none;">
+        <input type="date" id="earn-week-anchor" style="display:none;">
+        <input type="month" id="earn-month">
+        <input type="number" id="earn-year" style="display:none;width:90px;">
+        <input type="date" id="earn-start" style="display:none;">
+        <span id="earn-dash" style="display:none;align-self:center;color:var(--muted);">→</span>
+        <input type="date" id="earn-end" style="display:none;">
+      </div>
+    </div>
+
+    <div class="stat-row" style="grid-template-columns:repeat(3,1fr);">
+      <div class="stat-card"><div class="num" id="earn-aff-total" style="color:var(--amber-strong);">$0</div><div class="lbl" data-i18n="earn_affiliazioni">Affiliazioni</div></div>
+      <div class="stat-card"><div class="num" id="earn-ret-total" style="color:var(--teal);">$0</div><div class="lbl" data-i18n="earn_retainer">Retainer</div></div>
+      <div class="stat-card"><div class="num" id="earn-grand-total" style="color:var(--red);">$0</div><div class="lbl" data-i18n="earn_totale">Totale periodo</div></div>
+    </div>
+
+    <div id="earn-breakdown"></div>
+  </div>
+
+</div>
+
+<script src="content_tracker_synced_auth.js"></script>
+<script src="content_tracker_synced_app1.js"></script>
+<script src="content_tracker_synced_app2.js"></script>
+<script src="content_tracker_synced_app3.js"></script>
+<script src="content_tracker_synced_app4.js"></script>
+<script src="content_tracker_synced_app5.js"></script>
+</body>
+</html>
