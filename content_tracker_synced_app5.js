@@ -239,18 +239,44 @@ function computeGenericRange(prefix){
   return {start, end};
 }
 
+function getEditcountRate(){
+  const el = document.getElementById('editcount-rate');
+  const v = el ? parseFloat(el.value) : NaN;
+  return (isNaN(v) || v < 0) ? 0 : v;
+}
+
 function generateEditCount(){
   const {start, end} = computeGenericRange('editcount');
   const numEl = document.getElementById('editcount-number');
-  if(!start || !end){ numEl.textContent = '0'; return; }
+  const costEl = document.getElementById('editcount-cost');
+  if(!start || !end){
+    numEl.textContent = '0';
+    if(costEl) costEl.textContent = '$0.00';
+    return;
+  }
   const count = items.filter(it => it.editatoViaTransition && it.editatoDate && it.editatoDate >= start && it.editatoDate <= end).length;
   numEl.textContent = count;
+  if(costEl){
+    const total = count * getEditcountRate();
+    costEl.textContent = '$' + total.toFixed(2);
+  }
 }
 
 document.getElementById('editcount-period').addEventListener('change', ()=>{ updateEditcountPeriodInputs(); generateEditCount(); });
 ['editcount-day','editcount-week-anchor','editcount-month','editcount-year','editcount-start','editcount-end'].forEach(id=>{
   document.getElementById(id).addEventListener('change', generateEditCount);
 });
+
+(function initEditcountRate(){
+  const rateInput = document.getElementById('editcount-rate');
+  if(!rateInput) return;
+  const saved = localStorage.getItem('editcount-rate-per-video');
+  if(saved !== null && saved !== '') rateInput.value = saved;
+  rateInput.addEventListener('input', ()=>{
+    localStorage.setItem('editcount-rate-per-video', rateInput.value);
+    generateEditCount();
+  });
+})();
 
 function computeReportRange(){
   const period = document.getElementById('report-period').value;
