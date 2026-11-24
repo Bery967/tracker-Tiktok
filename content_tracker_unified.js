@@ -77,7 +77,9 @@ async function refreshUnifiedCalendar(){
     }));
     if(request!==unifiedState.request || !canViewUnifiedCalendar()) return;
     unifiedState.snapshots=snapshots;
-    if(unifiedState.selected===null) unifiedState.selected=new Set(snapshots.map(s=>s.profile.id));
+    // The tab can be opened while loadData is still loading the profile list.
+    // An empty bootstrap read must not deselect every profile on the real read.
+    if(unifiedState.selected===null && snapshots.length) unifiedState.selected=new Set(snapshots.map(s=>s.profile.id));
     unifiedState.updated=new Date();
   }catch(error){ if(request===unifiedState.request) unifiedState.error=true; }
   finally{ if(request===unifiedState.request){ unifiedState.loading=false; renderUnifiedCalendar(); } }
