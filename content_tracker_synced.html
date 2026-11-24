@@ -6,6 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Content Tracker</title>
+<link rel="stylesheet" href="content_tracker_unified.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -447,6 +448,10 @@
       <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="16" rx="3" stroke-width="1.6"/><path d="M3 10h18" stroke-width="1.6"/><path d="M8 3v4M16 3v4" stroke-width="1.6" stroke-linecap="round"/></svg>
       Calendario
     </button>
+    <button type="button" class="nav-item tab-btn owner-only" data-tab="unified" data-owner-only hidden>
+      <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="16" rx="3" stroke-width="1.6"/><path d="M3 10h18M8 3v4M16 3v4M8 14h2M14 14h2M8 17h2M14 17h2" stroke-width="1.6" stroke-linecap="round"/></svg>
+      <span data-i18n="tab_unified">Regia personale</span>
+    </button>
     <button type="button" class="nav-item tab-btn" data-tab="retainer" data-i18n="tab_retainer">
       <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="8" width="18" height="12" rx="2.5" stroke-width="1.6"/><path d="M8 8V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke-width="1.6"/><path d="M3 13h18" stroke-width="1.6"/></svg>
       Retainer
@@ -744,6 +749,10 @@
     <div id="cal-body"></div>
   </div>
 
+  <div class="panel owner-only" id="panel-unified" data-owner-only hidden>
+    <div id="unified-root"></div>
+  </div>
+
   <!-- RETAINER -->
   <div class="panel" id="panel-retainer">
     <div class="page-header"><div><h1 class="page-title" data-i18n="tab_retainer">Retainer</h1><p class="page-subtitle">Contratti attivi con i brand</p></div></div>
@@ -853,6 +862,7 @@
 <script src="content_tracker_synced_app2.js"></script>
 <script src="content_tracker_synced_app3.js"></script>
 <script src="content_tracker_synced_app4.js"></script>
+<script src="content_tracker_unified.js"></script>
 <script src="content_tracker_synced_app5.js"></script>
 </body>
 </html>

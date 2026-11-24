@@ -288,6 +288,9 @@ function applyRoleRestrictions(){
   } else {
     document.querySelectorAll('.tab-btn').forEach(btn=>{ btn.style.display=''; });
   }
+  document.querySelectorAll('[data-owner-only]').forEach(el=>{
+    el.hidden = currentRole !== 'admin' || isGuestMode;
+  });
 }
 
 document.getElementById('login-btn').addEventListener('click', doLogin);

@@ -386,15 +386,18 @@ function render(){
   renderAffiliateList();
   generateEarningsSummary();
   renderNotificationBell();
+  if(document.getElementById('panel-unified').classList.contains('active')) refreshUnifiedCalendar();
 }
 
 document.querySelectorAll('.tab-btn').forEach(btn=>{
   btn.addEventListener('click', ()=>{
+    if(btn.hasAttribute('data-owner-only') && !canViewUnifiedCalendar()) return;
     document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
     document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
     btn.classList.add('active');
     document.getElementById('panel-'+btn.getAttribute('data-tab')).classList.add('active');
     if(btn.getAttribute('data-tab')==='calendario') renderCalendar();
+    if(btn.getAttribute('data-tab')==='unified') refreshUnifiedCalendar();
   });
 });
 
