@@ -215,6 +215,8 @@ async function saveEditRetainer(id){
   const notes = document.getElementById('edit-ret-notes-'+id).value.trim();
   if(!brand || !start || !end || !videos){ alert('Servono almeno: marca, video pattuiti, data inizio e data fine.'); return; }
 
+  const linkedProfile = document.getElementById('edit-ret-profile-'+id);
+  if(linkedProfile) r.linkedProfileId = linkedProfile.value || null;
   r.brand = brand; r.videosRequired = videos; r.start = start; r.end = end;
   r.price = price; r.priceType = priceType; r.paymentMethod = paymentMethod; r.notes = notes;
 
@@ -245,7 +247,7 @@ async function toggleRetainerPaid(id){
   render();
 }
 
-function computeRetainerStats(r){
+function computeRetainerStats(r, linkedEntries = []){
   const normBrand = (s) => (s||'').toLowerCase().replace(/\s+/g,' ').trim();
   const brandItems = items.filter(it=> normBrand(it.brand) === normBrand(r.brand));
   let scheduled = 0, published = 0;
@@ -257,6 +259,12 @@ function computeRetainerStats(r){
     if(it.status==='pubblicato') published++;
   });
 
+  for(const entry of linkedEntries){
+    if(entry.profileId !== r.linkedProfileId || !entry.date || entry.date < r.start || entry.date > r.end || normBrand(entry.brand) !== normBrand(r.brand)) continue;
+    scheduled++;
+    if(entry.status === 'pubblicato') published++;
+  }
+
   const todayKey = dkey(new Date());
   const dStart = new Date(r.start), dEnd = new Date(r.end), dToday = new Date();
   const totalDays = Math.max(1, Math.round((dEnd-dStart)/86400000)+1);
@@ -265,8 +273,9 @@ function computeRetainerStats(r){
   const daysRemaining = Math.max(0, totalDays - daysElapsed);
 
   const expectedProgress = daysElapsed/totalDays;
-  const actualProgress = r.videosRequired>0 ? published/r.videosRequired : 0;
-  const remaining = Math.max(0, r.videosRequired - published);
+  const fulfilled = r.manualDone ? Math.max(published, r.videosRequired) : published;
+  const actualProgress = r.videosRequired > 0 ? fulfilled / r.videosRequired : 0;
+  const remaining = Math.max(0, r.videosRequired - fulfilled);
 
   let level = 'ok';
   let label = t('ret_in_linea');
@@ -297,15 +306,15 @@ function computeRetainerStats(r){
   return {scheduled, published, remaining, totalDays, daysElapsed, daysRemaining, expectedProgress, actualProgress, level, label, phase, phaseLabel, contractValue};
 }
 
-function renderRetainerSummary(){
+function renderRetainerSummary(linkedEntries){
   const totalEarn = retainers.reduce((sum,r)=>{
     const val = r.priceType==='video' ? r.price * r.videosRequired : r.price;
     return sum + val;
   }, 0);
   let inCorso = 0, terminati = 0;
   retainers.forEach(r=>{
-    const s = computeRetainerStats(r);
-    if(s.phase==='completato' || s.phase==='scaduto' || r.manualDone) terminati++;
+    const s = computeRetainerStats(r, linkedEntries);
+    if(s.phase==='completato' || s.phase==='scaduto') terminati++;
     else inCorso++;
   });
   document.getElementById('ret-sum-earn').textContent = '$' + totalEarn.toLocaleString('it-IT', {maximumFractionDigits:0});
@@ -314,7 +323,7 @@ function renderRetainerSummary(){
   document.getElementById('ret-sum-done').textContent = terminati;
 }
 
-function renderRetainerTimeline(){
+function renderRetainerTimeline(linkedEntries){
   const container = document.getElementById('retainer-timeline');
   if(retainers.length===0){
     container.innerHTML = '<div class="empty-hint">' + t('ret_add_first') + '</div>';
@@ -341,7 +350,7 @@ function renderRetainerTimeline(){
   html += '</tr></thead><tbody>';
 
   sortedRetainers.forEach(r=>{
-    const s = computeRetainerStats(r);
+    const s = computeRetainerStats(r, linkedEntries);
     html += `<tr><td class="brand-col">${escapeHtml(r.brand)}</td>`;
     months.forEach(mo=>{
       const monthStart = new Date(mo.y, mo.m, 1);

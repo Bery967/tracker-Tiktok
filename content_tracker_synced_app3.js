@@ -1,14 +1,42 @@
-function renderRetainers(){
-  renderRetainerSummary();
-  renderRetainerTimeline();
+let retainerRenderVersion = 0;
+async function renderRetainers(){
+  const version = ++retainerRenderVersion;
   const container = document.getElementById('retainer-list');
+  const linkedIds = [...new Set(retainers.map(r=>r.linkedProfileId).filter(Boolean))];
+  let linkedEntries = [];
+  if(linkedIds.length){
+    if(!document.getElementById('panel-retainer').classList.contains('active')) return;
+    try{
+      const snapshots = await Promise.all(linkedIds.map(async id=>{
+        const profile = profiles.find(candidate=>candidate.id===id);
+        if(!profile || !canViewUnifiedCalendar()) throw new Error('Profilo collegato non disponibile');
+        const [content, calendar] = await Promise.all([
+          window.storage.get('content-items::'+id, true),
+          window.storage.get('calendar-assignments::'+id, true)
+        ]);
+        if(!content || !calendar) throw new Error('Calendario collegato non disponibile');
+        return {profile, items:JSON.parse(content.value), assignments:JSON.parse(calendar.value)};
+      }));
+      linkedEntries = unifiedBuildEntries(snapshots);
+    }catch(error){
+      if(version===retainerRenderVersion){
+        container.textContent = 'Impossibile aggiornare i retainer condivisi. Riapri Retainer per riprovare.';
+        document.getElementById('retainer-timeline').replaceChildren();
+        for(const key of ['earn','total','progress','done']) document.getElementById('ret-sum-'+key).textContent='—';
+      }
+      return;
+    }
+    if(version!==retainerRenderVersion) return;
+  }
+  renderRetainerSummary(linkedEntries);
+  renderRetainerTimeline(linkedEntries);
   if(retainers.length===0){
     container.innerHTML = '<div class="empty-hint">Nessun retainer attivo. Aggiungine uno qui sopra.</div>';
     return;
   }
   const levelRank = {critical:0, warn:1, ok:2};
   const sorted = [...retainers].sort((a,b)=>{
-    const sa = computeRetainerStats(a), sb = computeRetainerStats(b);
+    const sa = computeRetainerStats(a, linkedEntries), sb = computeRetainerStats(b, linkedEntries);
     return levelRank[sa.level] - levelRank[sb.level];
   });
 
@@ -39,6 +67,7 @@ function renderRetainers(){
           </select>
         </div>
         <div class="form-row" style="margin-bottom:8px;">
+          ${canViewUnifiedCalendar() ? `<label>Includi anche i video di <select id="edit-ret-profile-${r.id}"><option value="">Solo questo profilo</option>${profiles.filter(profile=>profile.id!==currentProfileId).map(profile=>`<option value="${escapeHtml(profile.id)}" ${profile.id===r.linkedProfileId?'selected':''}>${escapeHtml(profile.handle)}</option>`).join('')}</select></label>` : ''}
           <input type="text" id="edit-ret-notes-${r.id}" value="${escapeHtml(r.notes||'')}" placeholder="Note" style="flex:1;">
         </div>
         <div class="actions">
@@ -47,7 +76,7 @@ function renderRetainers(){
         </div>
       </div>`;
     }
-    const s = computeRetainerStats(r);
+    const s = computeRetainerStats(r, linkedEntries);
     const barColor = s.level==='critical' ? 'var(--red)' : s.level==='warn' ? 'var(--amber)' : 'var(--teal)';
     const pct = Math.min(100, Math.round(s.actualProgress*100));
     const priceLabel = r.priceType==='video' ? `$${r.price}/video` : `$${r.price} totale`;
@@ -67,9 +96,9 @@ function renderRetainers(){
           <span class="ret-badge ${s.level}">${s.label}</span>
         </div>
       </div>
-      <div class="ret-meta">${formatDateItalian(r.start)} → ${formatDateItalian(r.end)} · ${priceLabel} (valore contratto $${s.contractValue.toLocaleString('it-IT',{maximumFractionDigits:0})} → $${(r.videosRequired>0 ? s.contractValue/r.videosRequired : 0).toLocaleString('it-IT',{maximumFractionDigits:2})}/video) · ${escapeHtml(r.paymentMethod||'Non specificato')}${r.notes ? ' · '+escapeHtml(r.notes) : ''}</div>
+      <div class="ret-meta">${formatDateItalian(r.start)} → ${formatDateItalian(r.end)} · ${priceLabel} (valore contratto $${s.contractValue.toLocaleString('it-IT',{maximumFractionDigits:0})} → $${(r.videosRequired>0 ? s.contractValue/r.videosRequired : 0).toLocaleString('it-IT',{maximumFractionDigits:2})}/video) · ${escapeHtml(r.paymentMethod||'Non specificato')}${r.linkedProfileId ? ' · Include '+escapeHtml(profiles.find(profile=>profile.id===r.linkedProfileId)?.handle || 'profilo collegato') : ''}${r.notes ? ' · '+escapeHtml(r.notes) : ''}</div>
       <div class="ret-stats">
-        <div class="ret-stat"><div class="v">${s.published}/${r.videosRequired}</div>pubblicati</div>
+        <div class="ret-stat"><div class="v">${s.published}/${r.videosRequired}</div>pubblicati in calendario</div>
         <div class="ret-stat"><div class="v">${s.scheduled}</div>pianificati nel periodo</div>
         <div class="ret-stat"><div class="v">${s.remaining}</div>ancora da fare</div>
         <div class="ret-stat"><div class="v">${s.daysRemaining}</div>giorni rimasti</div>
@@ -112,6 +141,10 @@ function renderRetainers(){
     btn.addEventListener('click', cancelEditRetainer);
   });
 }
+
+document.querySelector('.tab-btn[data-tab="retainer"]').addEventListener('click', ()=>{
+  if(retainers.some(r=>r.linkedProfileId)) queueMicrotask(renderRetainers);
+});
 
 /* ---------- affiliazioni ---------- */
 document.getElementById('add-aff-btn').addEventListener('click', async ()=>{
